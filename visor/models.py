@@ -278,7 +278,7 @@ class Sample(models.Model):
     phrase_fields = ["sample_name"]
     choice_fields = ["origin__name", "sample_type__name"]
     numeric_fields = ["min_wavelength", "max_wavelength"]
-    m2m_managers = ["library"]
+    m2m_managers = ["libraries"]
     searchable_fields = phrase_fields + choice_fields + numeric_fields
 
     # private attributes used during creation process

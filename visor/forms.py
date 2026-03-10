@@ -46,8 +46,8 @@ class SearchForm(forms.Form):
         model_choice_fields = {
             "origin__name": [Database, "name"],
             "sample_type__name": [SampleType, "name"],
-            # TODO: restore if we ever actually use this
-            # "library": [Library, "name"],
+            # TODO: restore if we ever actually use this (in progress)
+            "libraries": [Library, "name"],
         }
         for form_field, model_plus_field in model_choice_fields.items():
             self.fields[form_field].choices = make_choice_list(
@@ -70,10 +70,10 @@ class SearchForm(forms.Form):
         )
     )
     id = forms.CharField(required=False)
-    # TODO: restore if and when we actually populate these
-    # library = forms.MultipleChoiceField(
-    #     required=False, label="Library Name", widget=SelectMultipleHide()
-    # )
+    # TODO: restore if and when we actually populate these (in progress)
+    libraries = forms.MultipleChoiceField(
+        required=False, label="Library", widget=SelectMultipleHide()
+    )
     origin__name = forms.MultipleChoiceField(
         required=False, label="Database of Origin", widget=SelectMultipleHide()
     )

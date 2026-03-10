@@ -28,12 +28,12 @@
                         {{ search_form.sample_name }}
                     </div>
 {#                    TODO: restore if and when we use this #}
-{#                    <div class="input-field col s12 m6 active">#}
-{#                        <label class="active" for={{ search_form.library.auto_id }}>#}
-{#                                {{ search_form.library.label }}#}
-{#                        </label>#}
-{#                        {{ search_form.library }}#}
-{#                    </div>#}
+                    <div class="input-field col s12 m6 active">
+                        <label class="active" for={{ search_form.libraries.auto_id }}>
+                                {{ search_form.libraries.label }}
+                        </label>
+                        {{ search_form.libraries }}
+                    </div>
                     <div class="input-field col s12 m6 active">
                         <label class="active" for={{ search_form.sample_type__name.auto_id }}>
                                 {{ search_form.sample_type__name.label }}

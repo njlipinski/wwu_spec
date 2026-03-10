@@ -120,7 +120,7 @@ def size_filter(search_results, sizes):
 def qual_field_filter(field, entry, search_results):
     # library is handled differently because it is a many-to-many
     # relation.
-    if field == "library":
+    if field == "libraries":
         library = Library.objects.get(name__exact=entry)
         return search_results & library.sample_set.all()
     # require exact phrase searches for choice fields,
