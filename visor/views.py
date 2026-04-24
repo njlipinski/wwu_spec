@@ -4,19 +4,22 @@ import json
 import logging
 from operator import or_
 from pathlib import Path
-import random
 from typing import TYPE_CHECKING
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
-from notetaking.notepad import Notepad
 from visor.io import handlers
 from visor.search import (
     search_all_samples,
     paginate_results,
     perform_search_from_form,
+)
+from visor.inventory import (
+    get_inventory_id_json,
+    set_inventory_id_json,
+    load_inventory,
 )
 from visor.forms import concealed_search_factory
 from visor.models import Database, Sample, FilterSet
@@ -25,71 +28,6 @@ if TYPE_CHECKING:
     from django.core.handlers.wsgi import WSGIRequest
 
 logger = logging.getLogger("django")
-
-
-def ip(request):
-    # forwarded ip from server layer -- this specific property may only
-    # be populated by nginx
-    forwarded_ip = request.META.get('HTTP_X_REAL_IP')
-    if forwarded_ip is not None:
-        return forwarded_ip
-    return request.META.get('REMOTE_ADDR')
-
-
-def session_id(request):
-    address = ip(request)
-    if request.session.get('identifier') is None:
-        request.session[
-            'identifier'
-        ] = f"{address}_{random.randint(1000000, 9999999)}"
-        logger.warning(
-            f"started session with identifier "
-            f"{request.session['identifier']}"
-        )
-    return request.session['identifier']
-
-
-def get_inventory_id_json(request) -> str:
-    # TODO: this is a hack and I don't like it. come up with a
-    #  better solution, maybe.
-    if sys.platform in ('win32', 'cygwin', 'darwin'):
-        inv = Path("local_user_inventory.json")
-        if inv.exists():
-            return inv.read_text()
-        else:
-            inv.write_text("[]")
-            return "[]"
-    try:
-        user_notes = Notepad(session_id(request))
-    except FileNotFoundError:
-        user_notes = Notepad.open(session_id(request))
-        user_notes['inventory'] = "[]"
-    return user_notes['inventory']
-
-
-def set_inventory_id_json(request) -> None:
-    inventory_ids = request.GET.get("inventory")
-    # TODO: this is a hack and I don't like it. come up with a
-    #  better solution.
-    if sys.platform in ('win32', 'cygwin', 'darwin'):
-        inv = Path("local_user_inventory.json")
-        if not inv.exists():
-            inv.touch()
-        inv.write_text(inventory_ids)
-        return
-    try:
-        user_notes = Notepad(session_id(request))
-    except FileNotFoundError:
-        user_notes = Notepad.open(session_id(request))
-    user_notes['inventory'] = inventory_ids
-
-
-def load_inventory(inventory_id_json: str) -> str:
-    inventory_id_list = json.loads(inventory_id_json)
-    inventory_samples = Sample.objects.filter(id__in=inventory_id_list)
-    return json.dumps(
-        [sample.as_json(brief=True) for sample in inventory_samples]
-    )
 
 
 @never_cache
